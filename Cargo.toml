@@ -2,6 +2,7 @@
 name = "mpc-manager"
 version = "0.1.0"
 edition = "2021"
+authors = ["aon <21188659+aon@users.noreply.github.com>"]
 
 [lib]
 path = "src/lib.rs"
