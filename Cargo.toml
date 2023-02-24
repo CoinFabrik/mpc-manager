@@ -1,0 +1,51 @@
+[package]
+name = "mpc-manager"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+path = "src/lib.rs"
+
+[[bin]]
+path = "src/main.rs"
+name = "mpc-manager"
+
+[features]
+default = ["server"]
+server = [
+    "axum",
+    "futures-util",
+    "json-rpc2",
+    "tokio",
+    "tokio-stream",
+    "tower",
+    "tower-http",
+    "tracing",
+    "tracing-bunyan-formatter",
+    "tracing-log",
+    "tracing-subscriber"
+]
+
+[dependencies]
+anyhow = "1"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+strum = { version = "0.24", features = ["derive"] }
+thiserror = "1"
+uuid = { version = "1.2.2", features = ["v4", "fast-rng", "macro-diagnostics", "serde"] }
+
+## Optional dependencies
+axum = { version = "0.6.2", features = ["ws"], optional = true }
+futures-util = { version = "0.3", optional = true }
+json-rpc2 = { version = "0.11", features = ["async"], optional = true }
+tokio = { version = "1", features = ["macros", "rt-multi-thread", "time"], optional = true }
+tokio-stream = { version = "0.1", optional = true }
+tower = { version = "0.4", features = ["util"], optional = true }
+tower-http = { version = "0.3", features = ["trace"], optional = true }
+tracing = { version = "0.1", optional = true }
+tracing-bunyan-formatter = { version = "0.3", optional = true }
+tracing-log = { version = "0.1", optional = true}
+tracing-subscriber = { version = "0.3", features = ["registry", "env-filter"], optional = true }
+
+[dev-dependencies]
+once_cell = "1"
