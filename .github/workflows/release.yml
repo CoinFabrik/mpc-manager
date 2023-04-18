@@ -27,15 +27,17 @@ jobs:
       - name: Archive Windows binary
         run: zip mpc-manager-x86_64-pc-windows-gnu.zip target/x86_64-pc-windows-gnu/release/mpc-manager.exe
 
-      - name: Build for Mac
-        run: cross build --target x86_64-apple-darwin --release
-      - name: Archive Mac binary
-        run: zip mpc-manager-x86_64-apple-darwin.zip target/x86_64-apple-darwin/release/mpc-manager
+      # Disabled due to cross not supporting Apple images, a custom dockerfile should be used
 
-      - name: Build for Apple M1
-        run: cross build --target aarch64-apple-darwin --release
-      - name: Archive Apple M1 binary
-        run: zip mpc-manager-aarch64-apple-darwin.zip target/aarch64-apple-darwin/release/mpc-manager
+      # - name: Build for Mac
+      #   run: cross build --target x86_64-apple-darwin --release
+      # - name: Archive Mac binary
+      #   run: zip mpc-manager-x86_64-apple-darwin.zip target/x86_64-apple-darwin/release/mpc-manager
+
+      # - name: Build for Apple M1
+      #   run: cross build --target aarch64-apple-darwin --release
+      # - name: Archive Apple M1 binary
+      #   run: zip mpc-manager-aarch64-apple-darwin.zip target/aarch64-apple-darwin/release/mpc-manager
 
       - name: Build for Linux
         run: cross build --target x86_64-unknown-linux-gnu --release
@@ -48,6 +50,4 @@ jobs:
           name: Release assets
           path: |
             mpc-manager-x86_64-pc-windows-gnu.zip
-            mpc-manager-x86_64-apple-darwin.zip
-            mpc-manager-aarch64-apple-darwin.zip
             mpc-manager-x86_64-unknown-linux-gnu.tar.gz
