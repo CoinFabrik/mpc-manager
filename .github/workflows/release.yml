@@ -1,0 +1,53 @@
+name: Add Build files to Release
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Set up Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install cross
+        run: cargo install cross
+
+      - name: Build for Windows
+        run: cross build --target x86_64-pc-windows-gnu --release
+      - name: Archive Windows binary
+        run: zip mpc-manager-x86_64-pc-windows-gnu.zip target/x86_64-pc-windows-gnu/release/mpc-manager.exe
+
+      - name: Build for Mac
+        run: cross build --target x86_64-apple-darwin --release
+      - name: Archive Mac binary
+        run: zip mpc-manager-x86_64-apple-darwin.zip target/x86_64-apple-darwin/release/mpc-manager
+
+      - name: Build for Apple M1
+        run: cross build --target aarch64-apple-darwin --release
+      - name: Archive Apple M1 binary
+        run: zip mpc-manager-aarch64-apple-darwin.zip target/aarch64-apple-darwin/release/mpc-manager
+
+      - name: Build for Linux
+        run: cross build --target x86_64-unknown-linux-gnu --release
+      - name: Archive Linux binary
+        run: tar -czvf mpc-manager-x86_64-unknown-linux-gnu.tar.gz -C target/x86_64-unknown-linux-gnu/release mpc-manager
+
+      - name: Upload release assets
+        uses: actions/upload-artifact@v2
+        with:
+          name: Release assets
+          path: |
+            mpc-manager-x86_64-pc-windows-gnu.zip
+            mpc-manager-x86_64-apple-darwin.zip
+            mpc-manager-aarch64-apple-darwin.zip
+            mpc-manager-x86_64-unknown-linux-gnu.tar.gz
