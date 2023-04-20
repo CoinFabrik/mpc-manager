@@ -9,6 +9,8 @@ use axum::routing::get;
 #[cfg(feature = "server")]
 use axum::Router;
 #[cfg(feature = "server")]
+use mpc_manager::configuration;
+#[cfg(feature = "server")]
 use mpc_manager::server::Server;
 #[cfg(feature = "server")]
 use mpc_manager::service::ServiceHandler;
@@ -47,6 +49,7 @@ struct AppState {
 async fn main() {
     let subscriber = get_subscriber("mpc-manager".into(), "info".into(), std::io::stdout);
     init_subscriber(subscriber);
+    let configuration = configuration::get_configuration().expect("Failed to build configuration.");
 
     let state = Arc::new(State::new());
     let service_handler = Arc::new(ServiceHandler::new());
@@ -60,9 +63,11 @@ async fn main() {
         .with_state(app_state)
         .layer(TraceLayer::new_for_http().make_span_with(DefaultMakeSpan::default()));
 
-    let addr = SocketAddr::from(([127, 0, 0, 1], 8080));
-    tracing::info!("Listening on {}", addr);
-    axum::Server::bind(&addr)
+    let address = format!("{}:{}", configuration.host, configuration.port)
+        .parse()
+        .expect("Failed to parse address");
+    tracing::info!("Listening on {}", address);
+    axum::Server::bind(&address)
         .serve(app.into_make_service_with_connect_info::<SocketAddr>())
         .await
         .unwrap();

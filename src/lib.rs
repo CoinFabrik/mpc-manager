@@ -11,6 +11,10 @@
 //! * Mpc-manager is built around using websockets with [json-rpc](https://www.jsonrpc.org/specification) as a messaging protocol.
 //! * Although it includes logging by default, it can be easily disabled.
 //! * It was built with security in mind: no data is stored long-term and as soon as it's not needed anymore it's deleted.
+
+#[cfg(feature = "server")]
+pub mod configuration;
+
 #[cfg(feature = "server")]
 pub mod server;
 #[cfg(feature = "server")]
