@@ -7,7 +7,7 @@ COPY src src
 COPY Cargo.toml Cargo.toml
 COPY Cargo.lock Cargo.lock
 
-RUN cargo build --release
+RUN cargo build --config net.git-fetch-with-cli=true --release
 
 # Runtime stage
 FROM debian:buster-slim
