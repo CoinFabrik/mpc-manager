@@ -22,6 +22,8 @@ pub type SessionPartyNumber = u16;
 pub enum SessionError {
     #[error("party number `{0}` is already occupied by another party")]
     PartyNumberAlreadyOccupied(SessionPartyNumber),
+    #[error("client `{0}` is already signed up")]
+    ClientAlreadySignedUp(ClientId),
 }
 
 /// Session kinds available in this implementation.
@@ -77,13 +79,13 @@ impl Session {
 
     /// Registers a client in the session and returns its party number.
     #[cfg(feature = "server")]
-    pub fn signup(&mut self, client_id: ClientId) -> SessionPartyNumber {
+    pub fn signup(&mut self, client_id: ClientId) -> anyhow::Result<SessionPartyNumber> {
         if self.is_client_in_session(&client_id) {
-            return self.get_party_number(&client_id).unwrap();
+            return Err(SessionError::ClientAlreadySignedUp(client_id).into());
         }
         let party_number = self.get_next_party_number();
         self.add_party(client_id, party_number);
-        party_number
+        Ok(party_number)
     }
 
     /// Signs in a client in the session with a given party number.

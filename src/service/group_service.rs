@@ -111,7 +111,10 @@ impl GroupService {
             })?;
 
         let group = state.add_group(params.parameters).await;
-        state.join_group(group.id, client_id).await.unwrap();
+        state
+            .join_group(group.id, client_id)
+            .await
+            .map_err(|e| Error::from(Box::from(e)))?;
         tracing::info!(group_id = group.id().to_string(), "Group created");
         let res = serde_json::to_value(GroupCreateResponse { group })
             .map_err(|e| Error::from(Box::from(e)))?;

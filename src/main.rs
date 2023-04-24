@@ -70,5 +70,5 @@ async fn main() {
     axum::Server::bind(&address)
         .serve(app.into_make_service_with_connect_info::<SocketAddr>())
         .await
-        .unwrap();
+        .expect("Failed to start server");
 }

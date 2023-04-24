@@ -124,7 +124,6 @@ impl State {
         if group.is_full() {
             return Err(StateError::GroupIsFull(group_id).into());
         }
-        drop(groups);
 
         // Join group
         let mut groups = self.groups.write().await;
@@ -146,7 +145,6 @@ impl State {
         groups
             .get(&group_id)
             .ok_or(StateError::GroupNotFound(group_id))?;
-        drop(groups);
 
         // Add session
         let mut groups = self.groups.write().await;
@@ -172,13 +170,12 @@ impl State {
         group
             .get_session(&session_id)
             .ok_or(StateError::SessionNotFound(session_id, group_id))?;
-        drop(groups);
 
         // Signup session
         let mut groups = self.groups.write().await;
         let group = groups.get_mut(&group_id).unwrap();
         let session = group.get_session_mut(&session_id).unwrap();
-        let party_index = session.signup(client_id);
+        let party_index = session.signup(client_id)?;
 
         let parties = session.get_number_of_clients();
         let session_c = session.clone();
@@ -203,7 +200,6 @@ impl State {
         group
             .get_session(&session_id)
             .ok_or(StateError::SessionNotFound(session_id, group_id))?;
-        drop(groups);
 
         // Login session
         let mut groups = self.groups.write().await;
