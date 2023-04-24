@@ -1,8 +1,13 @@
+//! Parameters state
+//!
+//! This module contains all the logic related to parameters management.
+
 use super::session::SessionKind;
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
+/// Parameters error.
 #[derive(Error, Debug)]
 pub enum ParametersError {
     #[error("invalid threshold {0}")]
@@ -11,6 +16,7 @@ pub enum ParametersError {
     InvalidParties(u16),
 }
 
+/// Parameters for the secret sharing scheme.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Parameters {
     /// Number of parties `n`.

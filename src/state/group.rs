@@ -1,3 +1,7 @@
+//! Group state
+//!
+//! This module contains all the logic related to group management.
+
 use super::{
     parameters::Parameters,
     session::{Session, SessionId},
@@ -11,8 +15,10 @@ use uuid::Uuid;
 #[cfg(feature = "server")]
 use super::session::{SessionKind, SessionValue};
 
+/// Unique ID of a group.
 pub type GroupId = Uuid;
 
+/// Error type for group operations.
 #[derive(Debug, Error)]
 pub enum GroupError {
     /// Error generated when the group is full.
@@ -36,6 +42,7 @@ pub struct Group {
 }
 
 impl Group {
+    /// Creates a new group with the given parameters.
     pub fn new(id: GroupId, params: Parameters) -> Self {
         Self {
             id,
@@ -45,6 +52,7 @@ impl Group {
         }
     }
 
+    /// Adds a client to the group.
     #[cfg(feature = "server")]
     pub fn add_client(&mut self, client_id: ClientId) -> anyhow::Result<()> {
         let clients = self.clients.len();
@@ -55,12 +63,14 @@ impl Group {
         Ok(())
     }
 
+    /// Removes a client from the group.
     #[cfg(feature = "server")]
     pub fn drop_client(&mut self, client_id: ClientId) {
         self.clients.remove(&client_id);
         // FIXME: delete from sessions too
     }
 
+    /// Adds a new session and adds it to the group.
     #[cfg(feature = "server")]
     pub fn add_session(&mut self, kind: SessionKind, value: SessionValue) -> Session {
         let session_id = Uuid::new_v4();
@@ -70,29 +80,40 @@ impl Group {
         session_c
     }
 
+    /// Returns a session by its ID, if it exists.
     #[cfg(feature = "server")]
     pub fn get_session(&self, session_id: &SessionId) -> Option<&Session> {
         self.sessions.get(session_id)
     }
 
+    /// Returns a mutable session by its ID, if it exists.
     #[cfg(feature = "server")]
     pub fn get_session_mut(&mut self, session_id: &SessionId) -> Option<&mut Session> {
         self.sessions.get_mut(session_id)
     }
 
+    /// Returns a boolean indicating if the group is empty.
     #[cfg(feature = "server")]
     pub fn is_empty(&self) -> bool {
         self.clients.len() == 0
     }
 
+    /// Returns a boolean indicating if the group is full.
     #[cfg(feature = "server")]
     pub fn is_full(&self) -> bool {
         self.clients.len() == self.params.n() as usize
     }
 
+    /// Returns the ID of the group.
     #[cfg(feature = "server")]
     pub fn id(&self) -> GroupId {
         self.id
+    }
+
+    /// Returns the client ids associated with the group.
+    #[cfg(feature = "server")]
+    pub fn clients(&self) -> &HashSet<ClientId> {
+        &self.clients
     }
 }
 

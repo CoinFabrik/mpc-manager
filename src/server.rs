@@ -1,3 +1,7 @@
+//! # Server implementation.
+//!
+//! This module contains the server implementation using Axum.
+
 use crate::{
     service::{notification::Notification, ServiceHandler},
     state::{ClientId, State},
@@ -122,8 +126,7 @@ impl Server {
                 method,
                 message,
             } => {
-                let groups = self.state.groups.read().await;
-                let Some(group) = groups.get(group_id) else {
+                let Ok(mut client_ids) = self.state.get_client_ids_from_group(group_id).await else {
                     return tracing::warn!(
                         group_id = group_id.to_string(),
                         "Group not found while sending group notification"
@@ -134,12 +137,12 @@ impl Server {
                     method.into(),
                     Some(message.clone()), //FIXME check message format
                 );
-                let filtered_clients = group
-                    .clients
-                    .iter()
-                    .filter(|&client_id| !filter.iter().any(|c| c == client_id));
+                let filtered_clients: Vec<ClientId> = client_ids
+                    .drain(..)
+                    .filter(|client_id| !filter.iter().any(|c| c == client_id))
+                    .collect();
                 for client_id in filtered_clients {
-                    self.send_rpc_request(&request, client_id).await;
+                    self.send_rpc_request(&request, &client_id).await;
                 }
             }
             Notification::Session {
@@ -150,28 +153,20 @@ impl Server {
                 message,
             } => {
                 tracing::info!("Sending notification to session");
-                let groups = self.state.groups.read().await;
-                let Some(group) = groups.get(group_id) else {
+                let Ok(mut client_ids) = self.state.get_client_ids_from_session(group_id, session_id).await else {
                     return tracing::warn!(
                         group_id = group_id.to_string(),
-                        "Group not found while sending session notification"
-                    );
-                };
-                let Some(session) = group.get_session(session_id) else {
-                    return tracing::warn!(
                         session_id = session_id.to_string(),
                         "Session not found while sending session notification"
-                    )
+                    );
                 };
-
                 let request = json_rpc2::Request::new(None, method.into(), Some(message.clone()));
-                let filtered_clients = session
-                    .party_signups
-                    .iter()
-                    .filter(|(_, &client_id)| !filter.iter().any(|&c| c == client_id))
-                    .filter(|(_, &client_id)| client_id != self.client_id);
-                for (_, client_id) in filtered_clients {
-                    self.send_rpc_request(&request, client_id).await;
+                let filtered_clients = client_ids
+                    .drain(..)
+                    .filter(|client_id| !filter.iter().any(|c| c == client_id))
+                    .filter(|client_id| *client_id != self.client_id);
+                for client_id in filtered_clients {
+                    self.send_rpc_request(&request, &client_id).await;
                 }
             }
             Notification::Relay { method, messages } => {

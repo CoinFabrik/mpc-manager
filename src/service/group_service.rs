@@ -1,3 +1,8 @@
+//! # Group service
+//!
+//! This module contains the group service that handles incoming requests
+//! for group management.
+
 use crate::state::{
     group::{Group, GroupId},
     parameters::Parameters,
@@ -16,8 +21,10 @@ use std::str::FromStr;
 #[cfg(feature = "server")]
 use tokio::sync::Mutex;
 
+/// Prefix for group routes.
 pub const ROUTE_PREFIX: &str = "group";
 
+/// Available group methods.
 #[derive(Debug, Display, EnumString)]
 pub enum GroupMethod {
     #[strum(serialize = "group_create")]
@@ -26,28 +33,33 @@ pub enum GroupMethod {
     GroupJoin,
 }
 
+/// Group create request.
 #[derive(Deserialize, Serialize)]
 pub struct GroupCreateRequest {
     pub parameters: Parameters,
 }
 
+/// Group create response.
 #[derive(Deserialize, Serialize)]
 pub struct GroupCreateResponse {
     pub group: Group,
 }
 
+/// Group join request.
 #[derive(Deserialize, Serialize)]
 pub struct GroupJoinRequest {
     #[serde(rename = "groupId")]
     pub group_id: GroupId,
 }
 
+/// Group join response.
 #[derive(Deserialize, Serialize)]
 pub struct GroupJoinResponse {
     pub group: Group,
 }
 
-#[derive(Debug)]
+/// Group service that handles incoming requests and maps
+/// them to the corresponding methods.
 #[cfg(feature = "server")]
 pub struct GroupService;
 

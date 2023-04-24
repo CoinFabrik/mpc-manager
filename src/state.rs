@@ -1,3 +1,8 @@
+//! State module.
+//!
+//! This module contains the state of the server and the different types used
+//! to represent it.
+
 use uuid::Uuid;
 
 #[cfg(feature = "server")]
@@ -19,8 +24,10 @@ pub mod group;
 pub mod parameters;
 pub mod session;
 
+/// Unique ID of a client.
 pub type ClientId = Uuid;
 
+/// Error type for state operations.
 #[derive(Debug, Error)]
 #[cfg(feature = "server")]
 pub enum StateError {
@@ -46,9 +53,9 @@ pub enum StateError {
 #[cfg(feature = "server")]
 pub struct State {
     /// Connected clients.
-    pub clients: RwLock<HashMap<ClientId, UnboundedSender<String>>>,
+    clients: RwLock<HashMap<ClientId, UnboundedSender<String>>>,
     /// Collection of groups mapped by UUID.
-    pub groups: RwLock<HashMap<GroupId, Group>>,
+    groups: RwLock<HashMap<GroupId, Group>>,
 }
 
 #[cfg(feature = "server")]
@@ -207,6 +214,33 @@ impl State {
         let parties = session.party_signups.len();
         let threshold = group.params.threshold_reached(session_c.kind, parties);
         Ok((group.clone(), session_c, threshold))
+    }
+
+    /// Returns client ids associated with a given group, if it exists.
+    pub async fn get_client_ids_from_group(&self, group_id: &GroupId) -> Result<Vec<ClientId>> {
+        let groups = self.groups.read().await;
+        let group = groups
+            .get(group_id)
+            .ok_or(StateError::GroupNotFound(*group_id))?;
+        let client_ids: Vec<ClientId> = group.clients().iter().copied().collect();
+        Ok(client_ids)
+    }
+
+    /// Returns client ids associated with a given session, if it exists.
+    pub async fn get_client_ids_from_session(
+        &self,
+        group_id: &GroupId,
+        session_id: &SessionId,
+    ) -> Result<Vec<ClientId>> {
+        let groups = self.groups.read().await;
+        let group = groups
+            .get(group_id)
+            .ok_or(StateError::GroupNotFound(*group_id))?;
+        let session = group
+            .get_session(session_id)
+            .ok_or(StateError::SessionNotFound(*session_id, *group_id))?;
+        let client_ids = session.get_all_client_ids();
+        Ok(client_ids)
     }
 
     /// Returns client id associated with a given session and party number.

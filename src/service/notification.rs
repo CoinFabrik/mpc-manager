@@ -1,6 +1,10 @@
-use serde_json::Value;
+//! Notification
+//!
+//! This module contains the notification enum that is used to send
+//! notifications to multiple clients.
 
 use crate::state::{group::GroupId, session::SessionId, ClientId};
+use serde_json::Value;
 
 /// Notification sent by the server to multiple connected clients.
 #[derive(Debug)]

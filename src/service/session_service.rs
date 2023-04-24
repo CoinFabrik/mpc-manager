@@ -1,3 +1,8 @@
+//! # Session service
+//!
+//! This module contains the session service that handles incoming requests
+//! for session management.
+
 use crate::state::{
     group::{Group, GroupId},
     session::{Session, SessionId, SessionKind, SessionPartyNumber},
@@ -19,30 +24,41 @@ use std::sync::Arc;
 #[cfg(feature = "server")]
 use tokio::sync::Mutex;
 
+/// Prefix for session routes.
 pub const ROUTE_PREFIX: &str = "session";
 
+/// Available session methods.
 #[derive(Debug, Display, EnumString)]
 pub enum SessionMethod {
+    /// Create a new session.
     #[strum(serialize = "session_create")]
     SessionCreate,
+    /// Signup for a session.
     #[strum(serialize = "session_signup")]
     SessionSignup,
+    /// Login to a session.
     #[strum(serialize = "session_login")]
     SessionLogin,
+    /// Send a message to a session.
     #[strum(serialize = "session_message")]
     SessionMessage,
 }
 
+/// Available session events.
 #[derive(Debug, Display, EnumString)]
 pub enum SessionEvent {
+    /// A session was created.
     #[strum(serialize = "session_created")]
     SessionCreated,
+    /// A session has enough participants.
     #[strum(serialize = "session_ready")]
     SessionReady,
+    /// A session received a message.
     #[strum(serialize = "session_message")]
     SessionMessage,
 }
 
+/// Session create request.
 #[derive(Deserialize, Serialize)]
 pub struct SessionCreateRequest {
     #[serde(rename = "groupId")]
@@ -52,17 +68,20 @@ pub struct SessionCreateRequest {
     pub value: Option<Value>,
 }
 
+/// Session create response.
 #[derive(Serialize)]
 pub struct SessionCreateResponse {
     session: Session,
 }
 
+/// Session created notification.
 #[derive(Deserialize, Serialize)]
 pub struct SessionCreatedNotification {
     group: Group,
     session: Session,
 }
 
+/// Session signup request.
 #[derive(Deserialize, Serialize)]
 pub struct SessionSignupRequest {
     #[serde(rename = "groupId")]
@@ -71,6 +90,7 @@ pub struct SessionSignupRequest {
     pub session_id: SessionId,
 }
 
+/// Session signup response.
 #[derive(Serialize)]
 pub struct SessionSignupResponse {
     session: Session,
@@ -78,6 +98,7 @@ pub struct SessionSignupResponse {
     party_number: SessionPartyNumber,
 }
 
+/// Session login request.
 #[derive(Deserialize, Serialize)]
 pub struct SessionLoginRequest {
     #[serde(rename = "groupId")]
@@ -88,17 +109,20 @@ pub struct SessionLoginRequest {
     pub party_number: SessionPartyNumber,
 }
 
+/// Session login response.
 #[derive(Serialize)]
 pub struct SessionLoginResponse {
     session: Session,
 }
 
+/// Session ready notification.
 #[derive(Deserialize, Serialize)]
 pub struct SessionReadyNotification {
     group: Group,
     session: Session,
 }
 
+/// Session message request.
 #[derive(Debug, Deserialize, Serialize)]
 pub struct SessionMessageRequest<T: Serialize = Value> {
     #[serde(rename = "groupId")]
@@ -109,6 +133,7 @@ pub struct SessionMessageRequest<T: Serialize = Value> {
     pub message: T,
 }
 
+/// Session message notification.
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct SessionMessageNotification<T: Serialize = Value> {
     #[serde(rename = "groupId")]
@@ -119,6 +144,8 @@ pub struct SessionMessageNotification<T: Serialize = Value> {
     pub message: T,
 }
 
+/// Session service that handles incoming requests and maps
+/// them to the corresponding methods.
 #[derive(Debug)]
 #[cfg(feature = "server")]
 pub struct SessionService;

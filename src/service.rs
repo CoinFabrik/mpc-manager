@@ -1,3 +1,8 @@
+//! # JSON-RPC 2.0 services.
+//!
+//! Services are in charge of handling requests and notifications. They are
+//! registered in the server and invoked according to the request method.
+
 #[cfg(feature = "server")]
 use self::{
     group_service::GroupService, notification::Notification, session_service::SessionService,
@@ -13,6 +18,7 @@ pub mod group_service;
 pub mod notification;
 pub mod session_service;
 
+/// Separator for subroutes.
 pub const SUBROUTE_SEPARATOR: &str = "_";
 
 #[cfg(feature = "server")]
@@ -22,6 +28,8 @@ type ServiceResponse = Result<Option<json_rpc2::Response>, json_rpc2::Error>;
 #[async_trait]
 #[cfg(feature = "server")]
 pub trait Service: Send + Sync {
+    /// Handles incoming requests.
+    ///
     /// Should reply with a response or a `None`, according to the message type
     /// (request or notification).
     ///
@@ -73,8 +81,8 @@ impl ServiceHandler {
     /// Call services according to subroute.
     ///
     /// If no services match the incoming request this will
-    /// return `Error::MethodNotFound`.
-    pub async fn handle(
+    /// return `json_rpc2::Error::MethodNotFound`.
+    async fn handle(
         &self,
         req: &json_rpc2::Request,
         ctx: (Arc<State>, Arc<tokio::sync::Mutex<Vec<Notification>>>),
@@ -95,6 +103,7 @@ impl ServiceHandler {
         Ok(Some(self.build_error_not_found_method(req)))
     }
 
+    /// Build a `json_rpc2::Error::MethodNotFound` error response.
     fn build_error_not_found_method(&self, req: &json_rpc2::Request) -> json_rpc2::Response {
         let err = json_rpc2::Error::MethodNotFound {
             name: req.method().to_string(),

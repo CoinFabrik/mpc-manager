@@ -12,7 +12,7 @@ path = "src/main.rs"
 name = "mpc-manager"
 
 [features]
-default = ["server"]
+default = []
 server = [
     "axum",
     "config",

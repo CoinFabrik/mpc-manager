@@ -1,6 +1,6 @@
 //! # MPC Manager
 //!
-//! This library is part of the [mpc-framework](https://github.com/mpc-framework).
+//! This library is part of the [mpc-framework](https://github.com/CoinFabrik/wasm-multi-party-ecdsa).
 //! It has been created to work as a coordinator between different parties in a
 //! multi-party-computation.
 //!

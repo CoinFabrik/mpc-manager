@@ -1,3 +1,7 @@
+//! Session state
+//!
+//! This module contains all the logic related to session management.
+
 use super::ClientId;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -6,16 +10,21 @@ use strum::EnumString;
 use thiserror::Error;
 use uuid::Uuid;
 
+/// Value associated to a session.
 pub type SessionValue = Option<Value>;
+/// Unique ID of a session.
 pub type SessionId = Uuid;
+/// Party number of a session.
 pub type SessionPartyNumber = u16;
 
+/// Error type for session operations.
 #[derive(Debug, Error)]
 pub enum SessionError {
     #[error("party number `{0}` is already occupied by another party")]
     PartyNumberAlreadyOccupied(SessionPartyNumber),
 }
 
+/// Session kinds available in this implementation.
 #[derive(Debug, Clone, Copy, Deserialize, Serialize, EnumString)]
 pub enum SessionKind {
     /// Key generation session.
@@ -54,6 +63,7 @@ pub struct Session {
 }
 
 impl Session {
+    /// Creates a new session with the given parameters.
     pub fn new(id: Uuid, kind: SessionKind, value: SessionValue) -> Self {
         Self {
             id,
@@ -65,6 +75,7 @@ impl Session {
         }
     }
 
+    /// Registers a client in the session and returns its party number.
     #[cfg(feature = "server")]
     pub fn signup(&mut self, client_id: ClientId) -> SessionPartyNumber {
         if self.is_client_in_session(&client_id) {
@@ -75,6 +86,7 @@ impl Session {
         party_number
     }
 
+    /// Signs in a client in the session with a given party number.
     #[cfg(feature = "server")]
     pub fn login(
         &mut self,
@@ -108,7 +120,7 @@ impl Session {
             .map(|(party, _)| *party)
     }
 
-    /// Returns true if client is already in this session
+    /// Returns boolean indicating if the client is already in this session.
     #[cfg(feature = "server")]
     pub fn is_client_in_session(&self, client_id: &ClientId) -> bool {
         self.party_signups.values().any(|id| id == client_id)
@@ -123,14 +135,13 @@ impl Session {
             .map(|(_, id)| *id)
     }
 
-    /// Returns all the client ids.
+    /// Returns all the client ids associated with the session.
     #[cfg(feature = "server")]
     pub fn get_all_client_ids(&self) -> Vec<ClientId> {
         self.party_signups.values().copied().collect()
     }
 
-    /// Returns the number of clients associated with
-    /// this session.
+    /// Returns the number of clients associated with this session.
     #[cfg(feature = "server")]
     pub fn get_number_of_clients(&self) -> usize {
         self.party_signups.len()
