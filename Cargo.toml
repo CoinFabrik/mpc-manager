@@ -1,8 +1,16 @@
 [package]
 name = "mpc-manager"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 authors = ["aon <21188659+aon@users.noreply.github.com>"]
+license-file = "LICENSE"
+description = "A WebSocket Manager that facilitates secure communication between parties for multi party computation applications."
+homepage = "https://github.com/CoinFabrik"
+repository = "https://github.com/CoinFabrik/mpc-manager"
+readme = "README.md"
+keywords = ["mpc", "websocket", "multi", "party", "computation"]
+categories = ["cryptography", "network-programming", "security", "web-programming"]
+documentation = "https://docs.rs/mpc-manager"
 
 [lib]
 path = "src/lib.rs"
